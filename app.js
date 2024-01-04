@@ -22,7 +22,7 @@ const connectDB = async () => {
 
 const PORT = process.env.PORT || 8000
 app.get("/", (req, res) => {
-    res.send("helloooo1234"+PORT);
+    res.send("helloooo1234");
 });
 //Connect to the database before listening
 connectDB().then(() => {
