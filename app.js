@@ -4,9 +4,9 @@ const cors = require("cors")
 const app = express();
 app.use(cors())
 app.use(express.json())
-// app.get("/", (req, res) => {
-//     res.send("helloooo1234");
-// });
+app.get("/", (req, res) => {
+    res.send("helloooo1234");
+});
 app.use("/" , require("./routes/homeRoute"))
 app.use("/home" , require("./routes/productRoute"))
 
@@ -25,9 +25,9 @@ const connectDB = async () => {
 
 
 const PORT = process.env.PORT || 8000
-//Connect to the database before listening
+
 connectDB().then(() => {
-    app.listen(PORT, (req,res) => {
-        res.json("listening for requests");
+    app.listen(PORT, () => {
+        console.log("listening for requests");
     })
 })
