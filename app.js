@@ -27,7 +27,7 @@ const connectDB = async () => {
 const PORT = process.env.PORT || 8000
 //Connect to the database before listening
 connectDB().then(() => {
-    app.listen(PORT, () => {
-        console.log("listening for requests");
+    app.listen(PORT, (req,res) => {
+        res.json("listening for requests");
     })
 })
