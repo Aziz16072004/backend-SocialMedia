@@ -24,7 +24,6 @@ const connectDB = async () => {
   }
 
 
-mongoose.connect('mongodb://127.0.0.1:27017/data');
 const PORT = process.env.PORT || 8000
 //Connect to the database before listening
 connectDB().then(() => {
