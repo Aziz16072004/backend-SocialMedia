@@ -5,7 +5,7 @@ const app = express();
 app.use(cors())
 app.use(express.json())
 app.get("/", (req, res) => {
-    res.send("helloooo");
+    res.send("helloooo1234");
 });
 app.use("/" , require("./routes/homeRoute"))
 app.use("/home" , require("./routes/productRoute"))
