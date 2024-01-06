@@ -40,7 +40,7 @@ app.post('/posts/upload', upload.single('image'), async (req, res) => {
     try {
         const newPost = new Post({
             name: req.body.name,
-            name: req.body.description,
+            description: req.body.description,
             image: `uploads/${req.file.filename}`
         });
 
