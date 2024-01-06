@@ -3,10 +3,13 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-
 const cors = require("cors")
 const app = express();
-app.use(cors())
+const corsOptions = {
+    origin: 'http://localhost:3000',  // replace with your client's origin
+    optionsSuccessStatus: 200,
+  };
+app.use(cors(corsOptions))
 app.use(express.json())
 app.use("/" , require("./routes/homeRoute"))
 app.use("/home" , require("./routes/productRoute"))
