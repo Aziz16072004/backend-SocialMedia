@@ -42,7 +42,7 @@ app.post('/posts/upload', upload.single('image'), async (req, res) => {
         const newPost = new Post({
             name: req.body.name,
             description: req.body.description,
-            image: `uploads/${req.file}`
+            image: `uploads/${req.file.filename}`
         });
 
         await newPost.save();
