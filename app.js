@@ -64,7 +64,7 @@ app.get('/posts', async (req, res) => {
 mongoose.set("strictQuery" , false);
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGO_URI);
+        const conn = await mongoose.connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/data");
         console.log(`MongoDB Connected: ${conn.connection.host} `);
     } catch (error) {
         console.log(error);
@@ -72,7 +72,7 @@ const connectDB = async () => {
     }
 }
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT ||8000
 //Connect to the database before listening
 connectDB().then(() => {
     app.listen(PORT, () => {
