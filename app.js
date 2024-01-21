@@ -1,66 +1,39 @@
+const multer = require("multer")
+const fs = require("fs")
 const express = require('express');
 const mongoose = require('mongoose');
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 const cors = require("cors")
 const app = express();
-
+const User = require("./models/user")
+const Post = require("./models/post");
 
 app.use(cors());
 app.use(express.json())
-app.use("/" , require("./routes/homeRoute"))
+
 app.use("/home" , require("./routes/productRoute"))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+app.use("/" , require("./routes/homeRoute"))
+app.use("/user" , require("./routes/userRoute"))
+app.use("/posts" , require("./routes/postRoute"))
 
-// Set up Multer storage
-const storage = multer.diskStorage({
-    destination: function(req, file, cb) {
-        const dir = './uploads/';
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir);
-        }
-        cb(null, dir);
-    },
-    filename: function(req, file, cb) {
-        cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname);
-    }
-});
 
 const upload = multer({ storage: storage });
+;
+// app.get('/getUser/:id', async (req, res) => {
+//     const userId = req.params.id;
+//     try {
+//         const userData = await User.findById(userId);
 
-// Product model and schema
-const postSchema = new mongoose.Schema({
-    name: String,
-    description : String,
-    image: String
-});
+//         if (!userData) {
+//             return res.status(404).json({ message: 'User not found' });
+//         }
 
-const Post = mongoose.model('Post', postSchema);
-app.post('/posts/upload', upload.single('image'), async (req, res) => {
-    try {
-        const newPost = new Post({
-            name: req.body.name,
-            description: req.body.description,
-            image: `uploads/${req.file.filename}`
-        });
-
-        await newPost.save();
-        res.status(201).send(newPost);
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-app.get('/posts', async (req, res) => {
-    try {
-        const posts = await Post.find();
-        res.status(200).send(posts);
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-});
-
-
+//         res.json(userData);
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// });
 mongoose.set("strictQuery" , false);
 const connectDB = async () => {
     try {
@@ -71,9 +44,7 @@ const connectDB = async () => {
         process.exit(1);
     }
 }
-
 const PORT = process.env.PORT ||8000
-//Connect to the database before listening
 connectDB().then(() => {
     app.listen(PORT, () => {
         console.log("listening for requests");
