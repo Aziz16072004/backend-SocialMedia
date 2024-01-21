@@ -3,7 +3,7 @@ const router = express.Router()
 const userController  = require('../controller/userController')
 const multer = require("multer")
 const fs = require("fs")
-const path = require('path');
+
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
@@ -17,6 +17,7 @@ const storage = multer.diskStorage({
         cb(null, new Date().toISOString().replace(/:/g, '-') + '-' + file.originalname);
     }
 });
+const upload = multer({ storage: storage });
 
 router.post("/addFriend" , userController.addFriend)
 router.post("/acceptfriend" , userController.acceptfriend)
