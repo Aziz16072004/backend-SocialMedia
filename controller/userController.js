@@ -43,7 +43,7 @@ const checkUser = async (req ,res ) => {
 const getUser = async (req ,res ) => {
     const id = req.params.id
     try {
-        const check = await userSchema.findById(id).select('-postMarkes -__v -password').populate({
+        const check = await userSchema.findById(id).select('-postMarkes -__v').populate({
             path: 'requests.user',  
             model: 'User'  ,
             select : "username profileImg"
@@ -196,7 +196,7 @@ const rejectfriend = async (req, res) => {
 const postMarkes=  async (req,res) =>{
     const id = req.params.id
     try {
-        const data = await User.findById(id)
+        const data = await userSchema.findById(id)
         await data.populate({
             path: 'postMarkes.post',
             model: 'Post',
@@ -233,7 +233,7 @@ const updateUser =  async (req, res) => {
         profileImg: `uploads/${req.file.filename}`
     };
     try {
-        const userData = await User.findById(data.userId);
+        const userData = await userSchema.findById(data.userId);
         if (!userData) {
             return res.status(404).json({ message: 'User not found' });
         }
