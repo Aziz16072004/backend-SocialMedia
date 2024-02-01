@@ -47,11 +47,11 @@ const addUser = (userId,socketId)=>{
 io.on("connection", (socket) => {
     socket.on("add-user", (userId) => {
         addUser(userId , socket.id)
-        io.emit("getUsers", users);
+        io.emit("getUsers" , users)
+        console.log(users);
     });
     socket.on("sending-message", (user) => {
         const findUser = users.find(findUser => findUser.userId === user.to);
-
         if (findUser) {
             io.to(findUser.socketId).emit("receiving-message", true);
         } else {
@@ -60,6 +60,7 @@ io.on("connection", (socket) => {
     });
     socket.on("send-message", (data) => {
         const findUser = users.find(findUser => findUser.userId === data.to);
+        console.log(findUser);
         if (findUser) {
             io.to(findUser.socketId).emit("receive-message", { fromSelf: false, message: data.message });
         } else {
