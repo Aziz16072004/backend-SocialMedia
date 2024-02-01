@@ -36,3 +36,23 @@ module.exports.getMessages = async (req, res, next) => {
       next(ex);
     }
   };
+  module.exports.getLastMsg = async (req,res) =>{
+    const { from, to } = req.query; // Use req.query to access parameters from the query string
+
+    try {
+      const messages = await Messages.find({
+        users: {
+          $all: [from, to],
+        },
+      }).sort({ createdAt: -1 });
+  
+      if (messages.length > 0) {
+        res.json(messages[0].message.text);
+      } else {
+        res.json('No messages found');
+      }
+    } catch (error) {
+      console.error('Error in getLastMsg:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
