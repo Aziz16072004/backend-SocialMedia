@@ -6,7 +6,6 @@ const cors = require("cors")
 const http = require('http')
 const app = express();
 const {Server} = require("socket.io");
-const { log } = require('console');
 app.use(cors());
 app.use(express.json())
 
@@ -39,16 +38,36 @@ const io = new Server(server, {
 server.listen(PORT, () => {
     console.log("listening for requests");
 })
-
+function formatPostDate(createdAt) {
+    const postDate = new Date(createdAt);
+    const currentDate = new Date();
+  
+    const yearDiff = currentDate.getFullYear() - postDate.getFullYear();
+    const monthDiff = currentDate.getMonth() - postDate.getMonth();
+    const dayDiff = currentDate.getDate() - postDate.getDate();
+  
+    if (yearDiff > 0) {
+      return `${yearDiff === 1 ? 'year' : 'years'} ago`;
+    } else if (monthDiff > 0) {
+      return `${monthDiff === 1 ? 'month' : 'months'} ago`;
+    } else if (dayDiff > 0) {
+      return `${dayDiff === 1 ? 'day' : 'days'} ago`;
+    } else {
+      return 'Today';
+    }
+  }
 let users = []
 const addUser = (userId,socketId)=>{
     !users.some((user)=>user.userId === userId) && users.push({userId , socketId})
 }
+const removeUser = (socketId) => {
+    users = users.filter((user) => user.socketId !== socketId);
+  };
 io.on("connection", (socket) => {
     socket.on("add-user", (userId) => {
         addUser(userId , socket.id)
-        io.emit("getUsers" , users)
         console.log(users);
+        io.emit("getUsers" , users)
     });
     socket.on("sending-message", (user) => {
         const findUser = users.find(findUser => findUser.userId === user.to);
@@ -60,15 +79,22 @@ io.on("connection", (socket) => {
     });
     socket.on("send-message", (data) => {
         const findUser = users.find(findUser => findUser.userId === data.to);
-        console.log(findUser);
         if (findUser) {
             io.to(findUser.socketId).emit("receive-message", { fromSelf: false, message: data.message });
         } else {
             console.log("User not found");
         }
     });
+    socket.on("send-notification", (data) => {
+        const findUser = users.find(findUser => findUser.userId === data.to);
+        if (findUser) {
+            io.to(findUser.socketId).emit("receive-notification", { user:{profileImg :data.img ,username:data.username},description:data.message , createdAt:formatPostDate(data.createdAt)});
+        } else {
+            console.log("User not found");
+        }
+    });
     socket.on("disconnect", () => {
-        
+        removeUser(socket.id);
     });
 });
 
