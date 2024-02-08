@@ -13,6 +13,7 @@ app.use("/home" , require("./routes/productRoute"))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use("/" , require("./routes/homeRoute"))
 app.use("/user" , require("./routes/userRoute"))
+app.use("/notification" , require("./routes/NotificationRoute"))
 app.use("/posts" , require("./routes/postRoute"))
 app.use("/message" , require("./routes/messageRoute"))
 mongoose.set("strictQuery" , false);
@@ -58,7 +59,9 @@ function formatPostDate(createdAt) {
   }
 let users = []
 const addUser = (userId,socketId)=>{
-    !users.some((user)=>user.userId === userId) && users.push({userId , socketId})
+    if(!users.some((user)=>user.userId === userId)){
+        users.push({userId , socketId})
+    } 
 }
 const removeUser = (socketId) => {
     users = users.filter((user) => user.socketId !== socketId);
@@ -67,7 +70,7 @@ io.on("connection", (socket) => {
     socket.on("add-user", (userId) => {
         addUser(userId , socket.id)
         console.log(users);
-        io.emit("getUsers" , users)
+        io.emit("getUsers", users)
     });
     socket.on("sending-message", (user) => {
         const findUser = users.find(findUser => findUser.userId === user.to);
@@ -88,13 +91,22 @@ io.on("connection", (socket) => {
     socket.on("send-notification", (data) => {
         const findUser = users.find(findUser => findUser.userId === data.to);
         if (findUser) {
-            io.to(findUser.socketId).emit("receive-notification", { user:{profileImg :data.img ,username:data.username},description:data.message , createdAt:formatPostDate(data.createdAt)});
+            io.to(findUser.socketId).emit("receive-notification", { sender:{profileImg :data.img ,username:data.username},description:data.message ,read:false, createdAt:formatPostDate(data.createdAt)});
+        } else {
+            console.log("User not found");
+        }
+    });
+    socket.on("addFriend", (data) => {
+        const findUser = users.find(findUser => findUser.userId === data.to);
+        if (findUser) {
+            io.to(findUser.socketId).emit("receive-addFriends", { user:{profileImg :data.img ,username:data.username , _id :data.from }});
         } else {
             console.log("User not found");
         }
     });
     socket.on("disconnect", () => {
         removeUser(socket.id);
+        io.emit("getUsers", users)
     });
 });
 

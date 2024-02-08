@@ -33,6 +33,13 @@ const userSchema = new mongoose.Schema({
       required: true,
     }}  
   ],
+  pending : [{
+    user : {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    }}  
+  ],
   requests : [{
     user : {
       type: mongoose.Schema.Types.ObjectId,
@@ -40,20 +47,10 @@ const userSchema = new mongoose.Schema({
       required: true,
     }}  
   ],
-  notifications : [{
-    user : {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },  
-    description : {
-      type : String ,
-    },
-    createdAt : {
-      type : Date,
-      default : Date.now()
-    }
-  }]
+  newNotifi : {
+    type: Number , 
+    default : 0
+  },
 });
 
 module.exports = mongoose.model('User', userSchema);

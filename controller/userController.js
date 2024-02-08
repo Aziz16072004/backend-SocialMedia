@@ -1,4 +1,5 @@
 const userSchema = require("../models/user");
+const notificationSchema = require("../models/notification");
 
 const Add_InsertUser = async (req ,res ) => {
     
@@ -52,11 +53,7 @@ const getUser = async (req ,res ) => {
             path: 'friends.user',  
             model: 'User',
             select : "username profileImg"
-        }).populate({
-            path: 'notifications.user',  
-            model: 'User',
-            select : "username profileImg"
-        });
+        })
         
         if (check){
             res.json(check)
@@ -99,7 +96,6 @@ const addFriend = async (req, res) => {
         if (!userRecipient) {
             return res.status(404).json({ error: 'Recipient not found' });
         }
-
         if (!userSender) {
             return res.status(404).json({ error: 'Sender not found' });
         }
@@ -115,13 +111,16 @@ const addFriend = async (req, res) => {
         }
 
         userRecipient.requests.push({ user: data.sender });
-        userRecipient.notifications = [
-            ...userRecipient.notifications,
-            { user: userSender._id, description: 'wants to be friends' }
-        ];
-
+        userSender.pending.push({ user: data.recipient });
+        userRecipient.newNotifi ++ ;
+        await notificationSchema.insertMany([{
+            sender : data.sender,
+            receiver : data.recipient,
+            description: 'wants to be friends'
+        }])
         await userRecipient.save();
-        res.json(userRecipient); // Respond with the updated userRecipient
+        await userSender.save();
+        res.json("sending invitation successfully");
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal server error' });
@@ -137,26 +136,30 @@ const acceptfriend = async (req, res) => {
     try {
         const userReceipent = await userSchema.findById(data.recipient);
         const userSender = await userSchema.findById(data.sender).select('-postMarkes -__v -password -requests')
+       
         if (!userReceipent) {
             return res.status(404).json({ error: 'Recipient not found' });
         }
         if (!userSender) {
             return res.status(404).json({ error: 'sender not found' });
         }
+
         const test = userReceipent.friends.find((findSender) => findSender.user.toString() === data.sender);
         if (test) {
             return res.json("You are already friends");
         }
+        await notificationSchema.insertMany([{
+            sender : data.recipient,
+            receiver : data.sender,
+            description: 'accept your friends request'
+        }])       
         userReceipent.friends.push({ user: data.sender });
         userSender.friends.push({ user: data.recipient });
         userReceipent.requests = userReceipent.requests.filter((request) => request.user.toString() !== data.sender);     
-        userSender.notifications = [
-            ...userSender.notifications,
-            { user: userReceipent._id, description: 'accept your friends request' }
-        ];        
+        userSender.pending = userReceipent.pending.filter((pend) => pend.user.toString() !== data.recipient);     
+        userSender.newNotifi ++ ;
         await userReceipent.save();
         await userSender.save();
-        // setting notifications 
         res.json(userSender);
     } catch (error) {
         console.error(error);
@@ -182,10 +185,13 @@ const rejectfriend = async (req, res) => {
             return res.json("You are already friends");
         }
         userReceipent.requests = userReceipent.requests.filter((request) => request.user.toString() !== data.sender); 
-            userSender.notifications = [
-            ...userSender.notifications,
-            { user: userReceipent._id, description: 'reject your friends request' }
-        ]; 
+        userSender.pending = userSender.pending.filter((pend) => pend.user.toString() !== data.recipient); 
+        userSender.newNotifi ++ ;
+        await notificationSchema.insertMany([{
+            sender : data.recipient,
+            receiver : data.sender,
+            description: 'reject your friends request'
+        }])
         await userReceipent.save();
         await userSender.save();
         res.json("reject friend successfuly");
