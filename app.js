@@ -9,10 +9,12 @@ const {Server} = require("socket.io");
 app.use(cors());
 app.use(express.json())
 
-app.use("/home" , require("./routes/productRoute"))
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+app.use('/storiesImgs', express.static(path.join(__dirname, 'storiesImgs')))
 app.use("/" , require("./routes/homeRoute"))
 app.use("/user" , require("./routes/userRoute"))
+app.use("/story", require("./routes/storyRoute"));
 app.use("/notification" , require("./routes/NotificationRoute"))
 app.use("/posts" , require("./routes/postRoute"))
 app.use("/message" , require("./routes/messageRoute"))
