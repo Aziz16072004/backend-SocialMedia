@@ -2,11 +2,17 @@ const Story = require("../models/story")
 const getStoriesForSwipper = async(req , res)=>{
     const userId = req.query.userId;
     try {
-        const stories = await Story.find({user : userId}).sort({createdAt:-1})
+        const stories = await Story.find({user : userId}).sort({createdAt:-1}).populate({
+            path: 'user',
+            model: 'User',
+            select: "username profileImg -_id"
+        })
         const formattedStories = stories.map((story) => ({
             type: "image",
             url: `http://localhost:8000/${story.image}`,
             duration: 4000,
+            user:story.user,
+            createdAt : story.createdAt
         }));
         console.log(formattedStories);
         res.json(formattedStories);
