@@ -8,8 +8,6 @@ const app = express();
 const {Server} = require("socket.io");
 app.use(cors());
 app.use(express.json())
-
-
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use('/storiesImgs', express.static(path.join(__dirname, 'storiesImgs')))
 app.use("/" , require("./routes/homeRoute"))
@@ -29,7 +27,6 @@ const connectDB = async () => {
     }
 } 
 connectDB()
-
 const PORT = process.env.PORT ||8000;
 const server = http.createServer(app) 
 const io = new Server(server, {
