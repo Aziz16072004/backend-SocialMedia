@@ -1,5 +1,7 @@
 const userSchema = require("../models/user");
 const notificationSchema = require("../models/notification");
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const Add_InsertUser = async (req ,res ) => {
     
@@ -25,22 +27,22 @@ const Add_InsertUser = async (req ,res ) => {
 }
 
 
-const checkUser = async (req ,res ) => {
-    
-    const {email , password} = req.body
+const checkUser = async (req, res) => {
+    const { email, password } = req.body;
     try {
-        const check = await userSchema.findOne({email:email})
-        if (check){
-            res.json(check)
-            
-        }
-        else {
-            res.json("nonexiste")
+        const check = await userSchema.findOne({ email: email });
+        if (check) {
+            const token = jwt.sign({ _id: check._id }, "aziz secret code", { expiresIn: '1d' });
+            res.cookie('jwt', token, { httpOnly: true, maxAge: 60 * 60 * 24 * 1000 });
+            res.json({ user: check, token: token });
+        } else {
+            res.json("nonexiste");
         }
     } catch (error) {
         console.log(error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-}
+};
 
 const getUser = async (req ,res ) => {
     const id = req.params.id

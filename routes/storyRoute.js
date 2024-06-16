@@ -3,7 +3,8 @@ const router = express.Router();
 const storyController = require("../controller/storyController");
 const multer = require("multer")
 const fs = require("fs")
-const path = require("path")
+const path = require("path");
+const { requireAuth } = require("../middlewares/auth");
 
 //uploading the image
 const storage = multer.diskStorage({
@@ -23,7 +24,7 @@ const upload = multer({ storage: storage });
 
 router.get("/getStories", storyController.getStories);
 router.get("/getStoriesForSwipper", storyController.getStoriesForSwipper);
-router.get("/getAllStories", storyController.getAllStories);
+router.get("/getAllStories",requireAuth, storyController.getAllStories);
 router.post("/addStory", upload.single('image') , storyController.addStory);
 
 module.exports = router;

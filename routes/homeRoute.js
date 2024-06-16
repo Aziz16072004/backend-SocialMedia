@@ -1,9 +1,9 @@
 const express = require('express')
 const userController  = require('../controller/userController')
+const { requireAuth } = require('../middlewares/auth')
 const router = express.Router()
 
-router.post("/" , userController.checkUser)
-router.post("/signup" , userController.Add_InsertUser)
+
 router.get("/getAllUsers" , userController.getAllUsers)
 router.get("/getOneUser/:id" , userController.getOneUser)
 

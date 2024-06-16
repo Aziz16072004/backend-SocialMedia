@@ -4,18 +4,49 @@ const mongoose = require('mongoose');
 const path = require('path');
 const cors = require("cors")
 const http = require('http')
+const cookieParser = require('cookie-parser');
 const app = express();
 const {Server} = require("socket.io");
-app.use(cors());
+const { requireAuth } = require('./middlewares/auth');
+
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true 
+}));
+app.use(cookieParser());
+
 app.use(express.json())
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 app.use('/storiesImgs', express.static(path.join(__dirname, 'storiesImgs')))
-app.use("/" , require("./routes/homeRoute"))
+
+
+app.use("/auth" ,require("./routes/authRoute") )
+app.use("/" ,requireAuth,require("./routes/homeRoute"))
+
+
+
 app.use("/user" , require("./routes/userRoute"))
 app.use("/story", require("./routes/storyRoute"));
 app.use("/notification" , require("./routes/NotificationRoute"))
 app.use("/posts" , require("./routes/postRoute"))
 app.use("/message" , require("./routes/messageRoute"))
+
+// --------------------------deployment------------------------------
+const __dirname1 = path.resolve();
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname1, "/client/build")));
+
+  app.get("*", (req, res) =>
+    res.sendFile(path.resolve(__dirname1, "client", "build", "index.html"))
+  );
+} else {
+  app.get("/", (req, res) => {
+    res.send("API is running..");
+  });
+}
+
+// --------------------------deployment------------------------------
+
 mongoose.set("strictQuery" , false);
 const connectDB = async () => {
     try {
@@ -68,7 +99,7 @@ const removeUser = (socketId) => {
 io.on("connection", (socket) => {
     socket.on("add-user", (userId) => {
         addUser(userId , socket.id)
-        console.log(users);
+        // console.log(users);
         io.emit("getUsers", users)
     });
     socket.on("sending-message", (user) => {

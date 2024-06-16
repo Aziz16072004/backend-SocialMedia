@@ -49,8 +49,6 @@ const getAllStories = async (req, res) => {
             path: 'lastStory.user',
             model: 'User',
         });
-
-        console.log(populatedData);
         res.json(populatedData);
     } catch (error) {
         console.log(error);
